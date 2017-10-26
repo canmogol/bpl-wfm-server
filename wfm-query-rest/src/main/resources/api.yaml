@@ -1,0 +1,74 @@
+---
+swagger: "2.0"
+info:
+  version: "0.0.1"
+host: "localhost:8081"
+basePath: "/api"
+tags:
+- name: "location"
+- name: "login"
+schemes:
+- "http"
+paths:
+  /location:
+    get:
+      tags:
+      - "location"
+      summary: "get all locations"
+      description: "return all locations on the system."
+      operationId: "getAllLocationResponseModel"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters: []
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LoginResponseDTO"
+        400:
+          description: "Location not found."
+  /login:
+    post:
+      tags:
+      - "login"
+      summary: "logs in a user"
+      description: "returns a model with user's name"
+      operationId: "login"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/LoginRequestDTO"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/LoginResponseDTO"
+        400:
+          description: "Invalid username or password"
+        404:
+          description: "Username not found"
+definitions:
+  LoginResponseDTO:
+    type: "object"
+    properties:
+      result:
+        type: "string"
+      name:
+        type: "string"
+  LoginRequestDTO:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+      password:
+        type: "string"
+      site:
+        type: "string"

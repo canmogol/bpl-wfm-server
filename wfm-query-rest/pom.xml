@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.bplsoft</groupId>
+  <artifactId>wfm-api-query</artifactId>
+  <version>0.0.1</version>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <undertow.version>1.4.20.Final</undertow.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <!-- COMPILE PLUGIN - JAVA 8 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.5</version>
+        <inherited>true</inherited>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
+      <!-- SWAGGER CODE GENERATOR -->
+      <!-- configuration and documentation
+      https://github.com/swagger-api/swagger-codegen/tree/master/modules/swagger-codegen-maven-plugin-->
+      <plugin>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-codegen-maven-plugin</artifactId>
+        <version>2.2.3</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <!-- YAML file destination -->
+              <!--<inputSpec>http://localhost:8081/api/swagger.yaml</inputSpec>-->
+              <inputSpec>src/main/resources/api.yaml</inputSpec>
+              <language>java</language>
+              <output>${project.build.directory}/generated-sources/wfm-query-api/</output>
+              <modelPackage>com.bplsoft.queryapi.model</modelPackage>
+              <apiPackage>com.bplsoft.queryapi.api</apiPackage>
+              <invokerPackage>com.bplsoft.queryapi.invoker</invokerPackage>
+              <!--<modelNamePrefix>QueryAPI</modelNamePrefix>-->
+              <generateApis>true</generateApis>
+              <generateSupportingFiles>true</generateSupportingFiles>
+              <generateApiTests>false</generateApiTests>
+              <generateApiDocumentation>false</generateApiDocumentation>
+              <generateModelTests>false</generateModelTests>
+              <generateModelDocumentation>false</generateModelDocumentation>
+              <configOptions>
+                <sourceFolder>src/gen/main/java/</sourceFolder>
+              </configOptions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- ANT PLUGIN TO REMOVE GENERATED AND UNUSED FILES -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <phase>generate-resources</phase>
+            <configuration>
+              <tasks>
+                <delete dir="${basedir}/target/generated-sources/wfm-query-api/.swagger-codegen"/>
+                <delete dir="${basedir}/target/generated-sources/wfm-query-api/gradle"/>
+                <delete dir="${basedir}/target/generated-sources/wfm-query-api/src/main"/>
+                <delete>
+                  <fileset dir="${basedir}/target/generated-sources/wfm-query-api/" includes="*"/>
+                </delete>
+                <delete file="${basedir}/target/generated-sources/wfm-query-api/.gitignore"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.2</version>
+          </dependency>
+          <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>2.7.5</version>
+          </dependency>
+          <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>logging-interceptor</artifactId>
+            <version>2.7.5</version>
+          </dependency>
+          <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.9</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!-- SWAGGER YAML/DOCUMENTATION GENERATOR -->
+      <!-- configuration and documentation
+      https://github.com/kongchen/swagger-maven-plugin-->
+      <plugin>
+        <groupId>com.github.kongchen</groupId>
+        <artifactId>swagger-maven-plugin</artifactId>
+        <version>3.1.5</version>
+        <configuration>
+          <apiSources>
+            <apiSource>
+              <springmvc>true</springmvc>
+              <locations>com.bplsoft.wfm.rest</locations>
+              <schemes>http</schemes>
+              <host>query.wfm.bplsoft.com</host>
+              <basePath>/api</basePath>
+              <info>
+                <title>Query Rest API</title>
+                <version>v0.0.1</version>
+                <description>
+                  WFM Query API documentation
+                </description>
+                <contact>
+                  <email>devel@bplsoft.com</email>
+                  <name>BPL Soft WFM Devel Team</name>
+                  <url>http://wfm.com/wfm</url>
+                </contact>
+                <license>
+                  <url>http://bplsoft.com/wfm/LICENSE.html</url>
+                  <name>BPL-WFM</name>
+                </license>
+              </info>
+              <swaggerDirectory>${basedir}/target/generated/swagger-ui</swaggerDirectory>
+              <swaggerApiReader>com.github.kongchen.swagger.docgen.reader.JaxrsReader</swaggerApiReader>
+              <attachSwaggerArtifact>true</attachSwaggerArtifact>
+              <outputFormats>yaml</outputFormats>
+            </apiSource>
+          </apiSources>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>compile</phase>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>2.7.5</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp</groupId>
+      <artifactId>logging-interceptor</artifactId>
+      <version>2.7.5</version>
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.9.9</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.kongchen</groupId>
+      <artifactId>swagger-maven-plugin</artifactId>
+      <version>3.1.5</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>2.0.0.Final</version>
+    </dependency>
+    <!-- TEST -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+
+
+    <!-- ************* -->
+    <!--  WFM-COMMON   -->
+    <!-- ************* -->
+
+    <!-- wfm-common -->
+    <dependency>
+      <groupId>com.bplsoft</groupId>
+      <artifactId>wfm-common</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+
+
+    <!-- ************* -->
+    <!--  WFM-QUERY    -->
+    <!-- ************* -->
+
+    <!-- wfm-query -->
+    <dependency>
+      <groupId>com.bplsoft</groupId>
+      <artifactId>wfm-query</artifactId>
+      <version>0.0.1</version>
+    </dependency>
+
+
+    <!-- ************* -->
+    <!--    SWAGGER    -->
+    <!-- ************* -->
+
+    <!-- swagger jaxrs -->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-jaxrs</artifactId>
+      <version>1.5.16</version>
+    </dependency>
+
+    <!-- swagger-jaxrs > jsr311-api -->
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
+    <!-- swagger-jaxrs > reflections -->
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.11</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- reflections > javassist -->
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <optional>false
+      </optional> <!-- case: when not actually scanning with javassist or if using {@link Reflections.collect()} -->
+      <version>3.21.0-GA</version>
+    </dependency>
+
+    <!-- swagger-jaxrs > guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>20.0</version>
+    </dependency>
+
+    <!-- swagger-jaxrs > swagger-core -->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-core</artifactId>
+      <version>1.5.16</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- swagger-core > swagger-models -->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-models</artifactId>
+      <version>1.5.16</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- swagger-models > slf4j-api -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.22</version>
+    </dependency>
+
+    <!-- swagger-models > swagger-annotations -->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
+      <version>1.5.16</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- swagger-core > jackson-dataformat-yaml -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>2.8.9</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- jackson-dataformat-yaml > snakeyaml -->
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.17</version>
+    </dependency>
+
+    <!-- swagger-core > commons-lang3 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.2.1</version>
+    </dependency>
+
+
+  </dependencies>
+
+
+</project>
